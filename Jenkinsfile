@@ -3,7 +3,7 @@ pipeline{
     stages{
         stage('Git Checkout'){
             steps{
-                git url:"https://github.com/cloudenguk/hr-api-multi", branch: "main"
+                git url:"https://github.com/cloudenguk/hr-api-multi"
             }
         }
         stage('Maven Build'){
@@ -18,22 +18,6 @@ pipeline{
             steps{
                 echo "deploying to dev environment"
             }
-        }
-        stage('QA Deploy'){
-            when{
-                branch 'qa'
-            }
-            steps{
-                echo "deploying to qa environment"
-            }
-        }
-        stage('Prod Deploy'){
-            when{
-                branch 'main'
-                
-            }
-            steps{
-                echo "deploying to production environment"
-            }
-        }
+        }       
+    }
 }
