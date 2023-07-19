@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages{
+        stage("git checkout"){
+            when{
+               expression{
+                  params.BranchName == "develop"
+                }
+            }
+            steps {
+                git branch: "${params.BranchName}", credentialsId: 'github-creds', url: 'https://github.com/cloudenguk/hr-api'
+            }
+        }
+        stage("Maven Build"){
+            when{
+                expression{
+                    params.BranchName == "develop"
+                }
+            }
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage("Tomcat Deploy - Dev"){
+            steps{
+                sshagent(['tomcat-dev']) {
+                    sh "scp -o StrictHostKeyChecking=no target/hr-api.war ec2-user@172.31.44.165:/opt/tomcat9/webapps/"
+                    sh "ssh ec2-user@172.31.44.165 /opt/tomcat9/bin/shutdown.sh"
+                    sh "ssh ec2-user@172.31.44.165 /opt/tomcat9/bin/startup.sh"
+                }
+            }
+        }
+    }
+    post {
+      always {
+        cleanWs()
+      }
+    }
+}
